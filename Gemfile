@@ -6,9 +6,14 @@ gemspec
 group :ldap do
     gem "net-ldap", "~> 0.1.1"
 end
+gem 'mysql2'
 
 group :active_resource do
   gem "activeresource", ">= 2.3.12", "< 4.0"
 end
 
-gem 'mysql2'
+
+group :development do
+  gem 'capistrano'
+  gem 'rvm-capistrano'
+end
