@@ -1,32 +1,33 @@
+require "rvm/capistrano"                                        #use RVM
+require "bundler/capistrano"                                    #use bundler
+default_run_options[:pty] = true                                #must be set for the password prompt from git to work
+
+set :scm, "git"                                                 #deploy from git repository
+set :repository, "git@github.com:lnthai2002/rubycas-server.git" #location of repository
+set :ssh_options, {:forward_agent => true}                      #use ssh key when deploy
+set :deploy_via, :remote_cache                                  #dont clone repo each deployment but pull difference only
+set :keep_releases, 2                                           #keep maximum 2 release
+
+require 'capistrano/ext/multistage'                             #multi-stage deployment
+set :stages, %w(production)
+set :default_stage, "production"
+
+set :application, "cas"                                         #name of application
+
+namespace :deploy do
+  after "deploy:update_code" , "deploy:copy_configuration"
+
+  task :copy_configuration do
+    run "cp #{config_loc}/#{rails_env}.config.yml #{release_path}/config.yml"
+  end
+
+  desc "Restart passenger with restart.txt"
+  task :restart, :except => { :no_release => true } do
+    run "touch #{current_path}/tmp/restart.txt"
+  end
+end
+
 =begin
-set :application, "CAS"
-set :repository,  "set your repository location here"
-
-# set :scm, :git # You can set :scm explicitly or Capistrano will make an intelligent guess based on known version control directory names
-# Or: `accurev`, `bzr`, `cvs`, `darcs`, `git`, `mercurial`, `perforce`, `subversion` or `none`
-
-role :web, "your web-server here"                          # Your HTTP server, Apache/etc
-role :app, "your app-server here"                          # This may be the same as your `Web` server
-role :db,  "your primary db-server here", :primary => true # This is where Rails migrations will run
-role :db,  "your slave db-server here"
-
-# if you want to clean up old releases on each deploy uncomment this:
-# after "deploy:restart", "deploy:cleanup"
-
-# if you're still using the script/reaper helper you will need
-# these http://github.com/rails/irs_process_scripts
-
-# If you are using Passenger mod_rails uncomment this:
-# namespace :deploy do
-#   task :start do ; end
-#   task :stop do ; end
-#   task :restart, :roles => :app, :except => { :no_release => true } do
-#     run "#{try_sudo} touch #{File.join(current_path,'tmp','restart.txt')}"
-#   end
-# end
-=end
-
-
 require "rvm/capistrano"
 require "bundler/capistrano" #not recommend use this because development and deployment on different platform(32b,64b) may cause problem installing gem due to missing ARCHFLAGS=
 #load "deploy/assets"
@@ -132,3 +133,4 @@ end
 def run_rake(cmd)
   run "cd #{current_path}; #{rake} #{cmd}"
 end
+=end
